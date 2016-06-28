@@ -46,7 +46,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="RZU-rH-ztR" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1266" y="320"/>
+            <point key="canvasLocation" x="1266" y="547"/>
         </scene>
         <!--Timeline View Controller-->
         <scene sceneID="yFo-2Y-T29">

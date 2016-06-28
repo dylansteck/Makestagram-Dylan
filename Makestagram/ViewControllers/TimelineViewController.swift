@@ -15,6 +15,11 @@ class TimelineViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     
     var photoTakingHelper: PhotoTakingHelper?
+    override func viewDidLoad(){
+        super.viewDidLoad()
+        //This delegate is allowing us to track changes to the items in the tab bar. We set it to self(the timeline view controller), giving it the capabilities of actually tracking the changes(our transition to the photo button)
+        self.tabBarController?.delegate = self
+    }
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         
@@ -65,6 +70,7 @@ extension TimelineViewController: UITabBarControllerDelegate {
     func tabBarController(tabBarController: UITabBarController, shouldSelectViewController viewController: UIViewController) -> Bool {
         if (viewController is PhotoViewController) {
             takePhoto()
+            print("Take Photo")
             return false
         } else {
             return true

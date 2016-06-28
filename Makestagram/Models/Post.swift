@@ -7,6 +7,7 @@
 //
 import Foundation
 import Parse
+import Bond
 
 // 1 To create a custom Parse class you need to inherit from PFObject and implement the PFSubclassing protocol
 class Post : PFObject, PFSubclassing {
@@ -36,7 +37,8 @@ class Post : PFObject, PFSubclassing {
             self.registerSubclass()
         }
     }
-    var image: UIImage?
+    //Ok, so what is this whole Observable thing? Basically it is just a wrapper around the actual value that we want to store. That wrapper allows us to listen for changes to the wrapped value. The Observable wrapper enables us to use the property together with bindings. You can see the type of the wrapped value in the angled brackets (<UIImage?>). These angled brackets mark the use of generics; a concept that we don't need to discuss now.
+    var image: Observable<UIImage?> = Observable(nil)
           var photoUploadTask: UIBackgroundTaskIdentifier?
     func uploadPost() {
         if let image = image {

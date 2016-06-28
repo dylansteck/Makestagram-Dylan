@@ -15,42 +15,33 @@ class TimelineViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     
     var photoTakingHelper: PhotoTakingHelper?
+    
     override func viewDidLoad(){
         super.viewDidLoad()
         //This delegate is allowing us to track changes to the items in the tab bar. We set it to self(the timeline view controller), giving it the capabilities of actually tracking the changes(our transition to the photo button)
         self.tabBarController?.delegate = self
     }
+    
+    //we store the posts, download all of the images, and finally update the table view.
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         
-        //  creating the query that fetches the Follow relationships for the current user.
-        let followingQuery = PFQuery(className: "Follow")
-        followingQuery.whereKey("fromUser", equalTo:PFUser.currentUser()!)
-        
-        // use that query to fetch any posts that are created by users that the current user is following.
-        let postsFromFollowedUsers = Post.query()
-        postsFromFollowedUsers!.whereKey("user", matchesKey: "toUser", inQuery: followingQuery)
-        
-        // create another query to retrieve all posts that the current user has posted.
-        let postsFromThisUser = Post.query()
-        postsFromThisUser!.whereKey("user", equalTo: PFUser.currentUser()!)
-        
-        // create a combined query of the 2. and 3. queries using the orQueryWithSubqueries method. The query generated this way will return any Post that meets either of the constraints of the queries in 2. or 3.
-        let query = PFQuery.orQueryWithSubqueries([postsFromFollowedUsers!, postsFromThisUser!])
-        // define that the combined query should also fetch the PFUser associated with a post. As you might remember, we are storing a pointer to a user object in the user column of each post. By using the includeKey method we tell Parse to resolve that pointer and download all the information about the user along with the post. We will need the username later when we display posts in our timeline.
-        query.includeKey("user")
-        // define that the results should be ordered by the createdAt field. This will make posts on the timeline appear in chronological order.
-        query.orderByDescending("createdAt")
-        
-        // kick off the network request.
-        query.findObjectsInBackgroundWithBlock {(result: [PFObject]?, error: NSError?) -> Void in
-            // In the completion block we receive all posts that meet our requirements. The Parse framework hands us an array of type [PFObject]?. However, we would like to store the posts in an array of type [Post]. In this step we check if it is possible to cast the result into a [Post]; if that's not possible (e.g. because the result is nil) we store an empty array ([]) in self.posts. The ?? operator is called the nil coalescing operator in Swift. If the statement before this operator returns nil, the return value will be replaced with the value after the operator.
+        ParseHelper.timelineRequestForCurrentUser {
+            (result: [PFObject]?, error: NSError?) -> Void in
             self.posts = result as? [Post] ?? []
-            // Once we have stored the new posts, we refresh the tableView.
+            
+            for post in self.posts {
+                do {
+                    let data = try post.imageFile?.getData()
+                    post.image = UIImage(data: data!, scale:1.0)
+                } catch {
+                    print("could not get image")
+                }
+            }
+            
             self.tableView.reloadData()
         }
     }
-    
     func takePhoto(){
         //instantiate photo taking class, provide callback for when photo is selected
         photoTakingHelper = PhotoTakingHelper(viewController: self.tabBarController!){(image: UIImage?) in
@@ -86,10 +77,11 @@ extension TimelineViewController: UITableViewDataSource {
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        // For now we return a simple placeholder cell with the title "Post"
-        let cell = tableView.dequeueReusableCellWithIdentifier("PostCell")!
+        // In this line we cast cell to our custom class PostTableViewCell. (In order to access the specific properties of our custom table view cell, we need to perform a cast to the type of our custom class. Without this cast the cell variable would have a type of a plain old UITableViewCell instead of our PostTableViewCell.)
+        let cell = tableView.dequeueReusableCellWithIdentifier("PostCell") as! PostTableViewCell
         
-        cell.textLabel!.text = "Post"
+        // Using the postImageView property of our custom cell we can now decide which image should be displayed in the cell.
+        cell.postImageView.image = posts[indexPath.row].image
         
         return cell
     }

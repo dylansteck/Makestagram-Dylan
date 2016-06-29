@@ -17,6 +17,10 @@ class Post : PFObject, PFSubclassing {
     @NSManaged var imageFile: PFFile?
     @NSManaged var user: PFUser?
     
+    //Ok, so what is this whole Observable thing? Basically it is just a wrapper around the actual value that we want to store. That wrapper allows us to listen for changes to the wrapped value. The Observable wrapper enables us to use the property together with bindings. You can see the type of the wrapped value in the angled brackets (<UIImage?>). These angled brackets mark the use of generics; a concept that we don't need to discuss now.
+    
+    var image: Observable<UIImage?> = Observable(nil)
+    var photoUploadTask: UIBackgroundTaskIdentifier?
     
     //MARK: PFSubclassing Protocol
     
@@ -37,11 +41,10 @@ class Post : PFObject, PFSubclassing {
             self.registerSubclass()
         }
     }
-    //Ok, so what is this whole Observable thing? Basically it is just a wrapper around the actual value that we want to store. That wrapper allows us to listen for changes to the wrapped value. The Observable wrapper enables us to use the property together with bindings. You can see the type of the wrapped value in the angled brackets (<UIImage?>). These angled brackets mark the use of generics; a concept that we don't need to discuss now.
-    var image: Observable<UIImage?> = Observable(nil)
-          var photoUploadTask: UIBackgroundTaskIdentifier?
+
+    
     func uploadPost() {
-        if let image = image {
+        if let image = image.value {
             guard let imageData = UIImageJPEGRepresentation(image, 0.8) else {return}
             guard let imageFile = PFFile(name: "image.jpg", data: imageData) else {return}
             

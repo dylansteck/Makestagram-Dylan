@@ -33,7 +33,7 @@ class TimelineViewController: UIViewController {
             for post in self.posts {
                 do {
                     let data = try post.imageFile?.getData()
-                    post.image = UIImage(data: data!, scale:1.0)
+                    post.image.value = UIImage(data: data!, scale:1.0)
                 } catch {
                     print("could not get image")
                 }
@@ -46,7 +46,7 @@ class TimelineViewController: UIViewController {
         //instantiate photo taking class, provide callback for when photo is selected
         photoTakingHelper = PhotoTakingHelper(viewController: self.tabBarController!){(image: UIImage?) in
            let post = Post()
-            post.image = image
+            post.image.value = image
             post.uploadPost()
                 
             }
@@ -81,7 +81,7 @@ extension TimelineViewController: UITableViewDataSource {
         let cell = tableView.dequeueReusableCellWithIdentifier("PostCell") as! PostTableViewCell
         
         // Using the postImageView property of our custom cell we can now decide which image should be displayed in the cell.
-        cell.postImageView.image = posts[indexPath.row].image
+        cell.postImageView.image = posts[indexPath.row].image.value
         
         return cell
     }
